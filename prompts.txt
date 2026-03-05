@@ -197,3 +197,20 @@ Line	Change
 +137	Added st.session_state.status = "playing" (critical: allows play after win/loss)
 +138	Added st.session_state.history = [] (clears old guesses)
 110	"between 1 and 100" → "between {low} and {high}" (dynamic hint text)
+
+----------------------------------------------
+
+1. higher/lower suggestion is broken (shows opposite)
+2. the secret keeps changing
+    the code was converting secret to string on even-numbered attempts
+3. no restriction to only use a value within 1-100
+4. "New Game" button doesn't work when you win
+    it keeps saying that "You already won. Start a new game to play again."
+5. the difficulty=Hard range is set to 1-50 instead of 500
+6. adding 5 points for every even number of attempts
+7. the attems starts with 1 instead of 0
+8. refactoring needed from app to logic_utils
+9. state problems
+10. Enter button doesn't work as well, you have to manually click submit
+11. Negative Numbers
+----------------------------------------------

@@ -10,7 +10,7 @@ Not sure why the show hint checkbox is really there
 
 New Game button wasnt working, Hint was broken, developer hints were backwards
 Easy, medium, difficult levels dont work. Everything is medium level.
-
+Show Hint checkbox randomly changes the number of attempts left and the score as well.
 
 """
 - What did the game look like the first time you ran it?
@@ -70,3 +70,5 @@ No?
   - This could be a testing habit, a prompting strategy, or a way you used Git.
 - What is one thing you would do differently next time you work with AI on a coding task?
 - In one or two sentences, describe how this project changed the way you think about AI generated code.
+
+
