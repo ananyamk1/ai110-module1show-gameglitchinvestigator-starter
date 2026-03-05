@@ -1,0 +1,199 @@
+Check test and edge cases if the new game button works
+Let me read the opened file to understand the code.
+
+Read app.py
+Here's a thorough analysis of the New Game button (lines 134-138) — I found several bugs and edge cases:
+
+New Game Handler (lines 134-138)
+
+if new_game:
+    st.session_state.attempts = 0
+    st.session_state.secret = random.randint(1, 100)
+    st.success("New game started.")
+    st.rerun()
+Bugs Found
+1. status is never reset (Critical)
+The handler doesn't reset st.session_state.status. After winning or losing, status stays "won" or "lost". On rerun, line 140 immediately calls st.stop(), making it impossible to play a new game after any completed game.
+
+Fix: Add st.session_state.status = "playing" to the handler.
+
+2. history is never cleared
+st.session_state.history accumulates guesses across games. Guesses from a previous game pollute the debug panel of the new game.
+
+Fix: Add st.session_state.history = [] to the handler.
+
+3. attempts starts at 0 instead of 1
+Initial state sets attempts = 1 (line 96), but the New Game handler sets it to 0. The first submit increments to 1, so behavior is identical — but it's an inconsistency that makes the attempt count display show one extra attempt on game start.
+
+4. Hardcoded range ignores difficulty
+Line 136 always uses random.randint(1, 100) regardless of the difficulty setting. Selecting Easy (range 1–20) or Hard (range 1–50) and clicking New Game silently generates a number outside the intended range.
+
+Fix: Use random.randint(low, high) where low, high come from get_range_for_difficulty(difficulty).
+
+Edge Case Summary
+Scenario	Expected	Actual
+New game before any guess	Works	Works
+New game after winning	Can play again	Stuck on "You already won"
+New game after losing	Can play again	Stuck on "Game over"
+New game mid-game	Fresh start	Old history persists, score carries over
+New game on Easy/Hard difficulty	Secret in difficulty range	Always 1–100
+New game multiple times	Each gives new secret	Works correctly
+Also: Hardcoded range in st.info (line 110)
+The hint text always says "between 1 and 100" regardless of difficulty — it should use {low} and {high} instead.
+
+
+make these changes in app.py
+Write recursive-hopping-snowglobe.md
+70 lines
+# Plan: Fix New Game Button Bugs in app.py
+
+## Context
+The New Game button in the Glitchy Guesser app has several bugs discovered during edge case analysis. Clicking New Game after winning/losing leaves the game in a broken state (can't play again), old history persists across games, attempt count starts at the wrong value, and the difficulty range is ignored when generating the new secret.
+
+## Critical File
+- `/Users/ananyak/Desktop/Codepath-AI110/ai110-module1show-gameglitchinvestigator-starter/app.py`
+
+---
+
+## Changes
+
+### 1. Fix `new_game` handler (lines 134-138)
+
+**Current:**
+```python
+if new_game:
+    st.session_state.attempts = 0
+    st.session_state.secret = random.randint(1, 100)
+    st.success("New game started.")
+    st.rerun()
+```
+
+**Fixed:**
+```python
+if new_game:
+    st.session_state.attempts = 1
+    st.session_state.secret = random.randint(low, high)
+    st.session_state.status = "playing"
+    st.session_state.history = []
+    st.success("New game started.")
+    st.rerun()
+```
+
+Changes:
+- `attempts = 1` (consistent with initial state on line 96)
+- `random.randint(low, high)` (uses difficulty-based range instead of hardcoded 1–100)
+- `status = "playing"` (allows play after win/loss — critical bug fix)
+- `history = []` (clears old guesses)
+
+---
+
+### 2. Fix hardcoded range string in `st.info` (line 110)
+
+**Current:**
+```python
+st.info(
+    f"Guess a number between 1 and 100. "
+    f"Attempts left: {attempt_limit - st.session_state.attempts}"
+)
+```
+
+**Fixed:**
+```python
+st.info(
+    f"Guess a number between {low} and {high}. "
+    f"Attempts left: {attempt_limit - st.session_state.attempts}"
+)
+```
+
+---
+
+## Verification
+1. Run `streamlit run app.py`
+2. Win a game → click New Game → confirm game is playable again
+3. Lose a game → click New Game → confirm game is playable again
+4. Switch to Easy difficulty → click New Game → confirm debug panel shows secret in range 1–20
+5. Confirm hint text reflects the correct range per difficulty
+6. Confirm history is empty in Debug Info after New Game
+Claude’s Plan
+Plan: Fix New Game Button Bugs in app.py
+Context
+The New Game button in the Glitchy Guesser app has several bugs discovered during edge case analysis. Clicking New Game after winning/losing leaves the game in a broken state (can't play again), old history persists across games, attempt count starts at the wrong value, and the difficulty range is ignored when generating the new secret.
+
+Critical File
+/Users/ananyak/Desktop/Codepath-AI110/ai110-module1show-gameglitchinvestigator-starter/app.py
+Changes
+1. Fix new_game handler (lines 134-138)
+Current:
+
+
+if new_game:
+    st.session_state.attempts = 0
+    st.session_state.secret = random.randint(1, 100)
+    st.success("New game started.")
+    st.rerun()
+Fixed:
+
+
+if new_game:
+    st.session_state.attempts = 1
+    st.session_state.secret = random.randint(low, high)
+    st.session_state.status = "playing"
+    st.session_state.history = []
+    st.success("New game started.")
+    st.rerun()
+Changes:
+
+attempts = 1 (consistent with initial state on line 96)
+random.randint(low, high) (uses difficulty-based range instead of hardcoded 1–100)
+status = "playing" (allows play after win/loss — critical bug fix)
+history = [] (clears old guesses)
+2. Fix hardcoded range string in st.info (line 110)
+Current:
+
+
+st.info(
+    f"Guess a number between 1 and 100. "
+    f"Attempts left: {attempt_limit - st.session_state.attempts}"
+)
+Fixed:
+
+
+st.info(
+    f"Guess a number between {low} and {high}. "
+    f"Attempts left: {attempt_limit - st.session_state.attempts}"
+)
+Verification
+Run streamlit run app.py
+Win a game → click New Game → confirm game is playable again
+Lose a game → click New Game → confirm game is playable again
+Switch to Easy difficulty → click New Game → confirm debug panel shows secret in range 1–20
+Confirm hint text reflects the correct range per difficulty
+Confirm history is empty in Debug Info after New Game
+User approved the plan
+Update Todos
+
+Fix new_game handler: reset status, history, attempts, and use difficulty range
+
+Fix hardcoded range string in st.info
+Edit app.py
+Added 2 lines
+Update Todos
+
+Fix new_game handler: reset status, history, attempts, and use difficulty range
+
+Fix hardcoded range string in st.info
+Edit app.py
+Modified
+Update Todos
+
+Fix new_game handler: reset status, history, attempts, and use difficulty range
+
+Fix hardcoded range string in st.info
+Done. Here's a summary of the 5 changes made to app.py:
+
+Line	Change
+135	attempts = 0 → attempts = 1 (consistent with initial state)
+136	randint(1, 100) → randint(low, high) (respects difficulty range)
++137	Added st.session_state.status = "playing" (critical: allows play after win/loss)
++138	Added st.session_state.history = [] (clears old guesses)
+110	"between 1 and 100" → "between {low} and {high}" (dynamic hint text)
