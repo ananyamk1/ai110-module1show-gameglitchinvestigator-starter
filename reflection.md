@@ -41,8 +41,7 @@ Suggested by claude: status change to "playing and cleared history.
 Fix that worked: new game session button worked/fixed
 Verified result by testing on streamlit and playing guess iteratively. It was giving 100% correct answers so thats when I chose to decide the bug is fixed - testing_new_game.py
 
-- Give one example of an AI suggestion that was incorrect or misleading (including what the AI suggested and how you verified the result).
-
+###- Give one example of an AI suggestion that was incorrect or misleading (including what the AI suggested and how you verified the result).
 
 Scoring logic summary before writing tests:
 
@@ -53,7 +52,7 @@ Unknown outcome: score unchanged
 
 The win formula was awarding points even when it shouldnt floor at 10 and the Too High branch was not correctly distinguishing even vs. odd attempts — both were fixed in update_score().
 Running test_new_game.py confirmed that status was never reset to "playing" on new game, which meant the game was stuck after a win/loss until I added st.session_state.status = "playing" to the handler
-
+###
 
 ---
 
