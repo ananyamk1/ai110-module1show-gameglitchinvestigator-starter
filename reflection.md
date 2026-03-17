@@ -1,16 +1,24 @@
 # 💭 Reflection: Game Glitch Investigator
 
-Guessed 8 (go higher) then 38 then 28 then 18 then 13 then 10 (said go lower every other time) and then 9 (said go higher?) but it still says I lost? ""Out of attempts! The secret was 41. Score: -15"" Not sure what was the actual answer.
-New Game doesnt work
+Guessed 8 (go higher) then 38 then 28 then 18 then 13 then 10 (said go lower every other time) and then 9 (said go higher?) but it still says I lost? ""Out of attempts! The secret was 41. Score: -15"" Not sure what was the actual answer. So, higher/lower suggestion is broken (shows opposite)
+New Game button doesnt work
+The secret keeps changing, not sure what its even doing
 Not sure why the show hint checkbox is really there
 
 """#Answer each question in 3 to 5 sentences. Be specific and honest about what actually happened while #you worked. This is about your process, not trying to sound perfect."""
 
 ## 1. What was broken when you started?
 
-New Game button wasnt working, Hint was broken, developer hints were backwards
-Easy, medium, difficult levels dont work. Everything is medium level.
+(1) New Game button wasn't working, Hint was broken, developer hints were backwards. Higher/lower suggestion is broken (shows opposite)
+(2) Was even accepting 0 as guessing value and negative scores
+(3) Easy, medium, difficult levels dont seem to work sensibily, (the difficulty=Hard range is set to 1-50 instead of 500) Everything is medium level. Says we have value range of 1 to 100 only but there's no restriction of it in the game
+(4) I noticed that when I play the first guess it should say 0th attempt but its saying 1st attempt
+
+
 Show Hint checkbox randomly changes the number of attempts left and the score as well.
+Its adding 5 points for every even number of attempts, no negative numbers
+Refactoring needed from app to logic_utils; there are state problems
+
 
 """
 - What did the game look like the first time you ran it?
@@ -25,10 +33,13 @@ Claude
 - Which AI tools did you use on this project (for example: ChatGPT, Gemini, Copilot)?
 - Give one example of an AI suggestion that was correct (including what the AI suggested and how you verified the result).
 
-For new game handler- bugs found: status is never reset so impossible to play anew game. Fix: Add st.session_state.status = "playing" to the handler.
-Suggested: status change to "playing and cleared history. 
-Worked: new game session worked/fixed
-Verified result by testing on streamlit - testing_new_game.py
+(1) Used Claude 
+(2) Example of Bug (1) and (2) above:
+Bug found: status is never reset so impossible to play anew game (new game handler) 
+Fix that worked: Add st.session_state.status = "playing" to the handler.
+Suggested by claude: status change to "playing and cleared history. 
+Fix that worked: new game session button worked/fixed
+Verified result by testing on streamlit and playing guess iteratively. It was giving 100% correct answers so thats when I chose to decide the bug is fixed - testing_new_game.py
 
 - Give one example of an AI suggestion that was incorrect or misleading (including what the AI suggested and how you verified the result).
 
@@ -40,15 +51,20 @@ Too High, even attempt: +5; odd attempt: −5
 Too Low: −5
 Unknown outcome: score unchanged
 
+The win formula was awarding points even when it shouldnt floor at 10 and the Too High branch was not correctly distinguishing even vs. odd attempts — both were fixed in update_score().
+Running test_new_game.py confirmed that status was never reset to "playing" on new game, which meant the game was stuck after a win/loss until I added st.session_state.status = "playing" to the handler
+
+
 ---
 
 ## 3. Debugging and testing your fixes
 
 - How did you decide whether a bug was really fixed?
-Ran test case file. Rechecked on streamlit byt trying multiple cases myself.
+Ran test case file. Rechecked on streamlit by trying multiple cases of games playing it personally. When I tried enough games and it gave higher/lower suggestion as it should 100% of the times, I concluded that bug was fixed.
 
 - Describe at least one test you ran (manual or using pytest)  
 Manual - tested by trying numbers lower and higher around hint answer. It showed that code was buggy in the sense that it should have said go higher but said go lower instead.
+
 
   and what it showed you about your code.
 - Did AI help you design or understand any tests? How?
