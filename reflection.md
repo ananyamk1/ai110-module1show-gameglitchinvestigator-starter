@@ -69,6 +69,9 @@ Manual - tested by trying numbers lower and higher around hint answer. It showed
 - Did AI help you design or understand any tests? How?
 No?
 
+Not directly because I identified the bug myself through manual testing. But once I saw the wrong feedback, I described the behavior to the AI and it helped me point exactly which line had the inverted condition and explained why the logic was wrong.
+
+
 ---
 
 ## 4. What did you learn about Streamlit and state?
@@ -85,7 +88,6 @@ Streamlit re-executes your whole script every time a user clicks a button or typ
 
 - What change did you make that finally gave the game a stable secret number?
 
-The change that fixed it:
 Instead of assigning secret_number = random.randint(...) directly, the number is only generated once and stored in st.session_state. On subsequent reruns, the existing value is reused rather than regenerated.
 
 ---
@@ -95,6 +97,10 @@ Instead of assigning secret_number = random.randint(...) directly, the number is
 - What is one habit or strategy from this project that you want to reuse in future labs or projects?
   - This could be a testing habit, a prompting strategy, or a way you used Git.
 - What is one thing you would do differently next time you work with AI on a coding task?
+
+Definetly testing habit. I think I identified a lot of bugs eventually rather than at the beginning which made solving them so messy for me so in future labs I am going to try to be more structured in the way to solve these issues instead of juggling multiple, i plan to focus on one bug before moving to another
+
 - In one or two sentences, describe how this project changed the way you think about AI generated code.
 
+I used to directly give everything to AI to debug which made things so much worse but now after this I think I can see its more effective to give file contexts and ask specific fixes rather then all bugs at once. AI generated code can still be broken or looped complicatedly, its best to see carefully what edits its suggesting and only use edits appropriate rather than all.
 
