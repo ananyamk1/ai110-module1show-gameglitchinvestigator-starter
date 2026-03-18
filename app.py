@@ -1,6 +1,31 @@
 import random
+from pathlib import Path
+
 import streamlit as st
 from logic_utils import check_guess
+
+HIGH_SCORE_FILE = Path(__file__).with_name("high_score.txt")
+
+
+def load_high_score() -> int:
+    if not HIGH_SCORE_FILE.exists():
+        return 0
+    try:
+        raw = HIGH_SCORE_FILE.read_text(encoding="utf-8").strip()
+        if raw == "":
+            return 0
+        value = int(raw)
+        return max(0, value)
+    except (ValueError, OSError):
+        return 0
+
+
+def save_high_score(score: int) -> None:
+    try:
+        HIGH_SCORE_FILE.write_text(str(max(0, score)), encoding="utf-8")
+    except OSError:
+        # App should continue running even if writing fails.
+        pass
 
 def get_range_for_difficulty(difficulty: str):
     #FIXME: The ranges for each difficulty level are not proper
@@ -82,6 +107,10 @@ if "attempts" not in st.session_state:
 if "score" not in st.session_state:
     st.session_state.score = 0
 
+if "high_score" not in st.session_state:
+    st.session_state.high_score = load_high_score()
+st.sidebar.metric("High Score", st.session_state.high_score)
+
 if "status" not in st.session_state:
     st.session_state.status = "playing"
 
@@ -155,6 +184,11 @@ if submit:
         )
 
         if outcome == "Win":
+            if st.session_state.score > st.session_state.high_score:
+                st.session_state.high_score = st.session_state.score
+                save_high_score(st.session_state.high_score)
+                st.info(f"🏆 New high score: {st.session_state.high_score}")
+
             st.balloons()
             st.session_state.status = "won"
             st.success(
